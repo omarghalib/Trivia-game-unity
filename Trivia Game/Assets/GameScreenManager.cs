@@ -1,10 +1,13 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Numerics;
 using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 using Random = System.Random;
+using Vector2 = UnityEngine.Vector2;
+
 public class GameScreenManager : MonoBehaviour
 {
     [SerializeField] private Button _actionButton;
@@ -13,27 +16,44 @@ public class GameScreenManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _questionRankText;
     [SerializeField] private TextMeshProUGUI _questionCategory;
     [SerializeField] private TextMeshProUGUI _counterText;
+    [SerializeField] private Button _backButton;
+    [SerializeField] private GameObject _goBackPopUp;
+    [SerializeField] private Button _goBackPopUpYes;
+    [SerializeField] private Button _goBackPopUpNo;
     [SerializeField] private Transform _contentContainer;
     [SerializeField] private GameObject _answerButtonPrefab;
     [SerializeField] private ScrollRect _scrollView;
+    private float _elapsedTime;
     private int _questionRank;
+    private const float SecondsToCount = 60.0f;
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
-        if(PlayerPrefs.GetString("category_choice_name","Random")!="Random")
+        if (PlayerPrefs.GetString("category_choice_name", "Random") != "Random")
             ApiClient.FetchQuestions(PlayerPrefs.GetInt("category_choice_id"));
         else
-        {
             ApiClient.FetchQuestions();
-        }
         ShowNextQuestion();
+        _backButton.onClick.AddListener(ShowGoBackPopUp);
     }
 
+    private void ShowGoBackPopUp()
+    {
+        _goBackPopUp.gameObject.SetActive(true);
+        _goBackPopUpYes.onClick.AddListener(() =>
+        {
+            SceneManager.LoadScene("MainScreenScene");
+        });
+        _goBackPopUpNo.onClick.AddListener(() =>
+        {
+            _goBackPopUp.gameObject.SetActive(false);
+        });
+    }
     private void UpdateQuestionRank(int rank)
     {
         _questionRankText.text = "Question " + rank + 1 + " / " + ApiClient.FetchedQuestions.Count;
     }
-    
+
     private void UpdateQuestionText(int rank)
     {
         _questionText.text = ApiClient.FetchedQuestions[rank].question;
@@ -46,21 +66,23 @@ public class GameScreenManager : MonoBehaviour
 
     private void AddAnswersForQuestion(int rank)
     {
-        Random rand = new Random();
-        int correctAnswerIndex = rand.Next(ApiClient.FetchedQuestions[rank].incorrect_answers.Count);
-        for (int i = 0; i < ApiClient.FetchedQuestions[rank].incorrect_answers.Count; i++)
-        {
-            if(i != correctAnswerIndex)
+        var rand = new Random();
+        var correctAnswerIndex = rand.Next(ApiClient.FetchedQuestions[rank].incorrect_answers.Count);
+        for (var i = 0; i < ApiClient.FetchedQuestions[rank].incorrect_answers.Count; i++)
+            if (i != correctAnswerIndex)
+            {
                 AddAnswerButtonToScrollArea(false, ApiClient.FetchedQuestions[rank].incorrect_answers[i]);
+            }
             else
             {
                 AddAnswerButtonToScrollArea(true, ApiClient.FetchedQuestions[rank].correct_answer);
                 AddAnswerButtonToScrollArea(false, ApiClient.FetchedQuestions[rank].incorrect_answers[i]);
             }
-        }
-        if(correctAnswerIndex == ApiClient.FetchedQuestions[rank].incorrect_answers.Count)
+
+        if (correctAnswerIndex == ApiClient.FetchedQuestions[rank].incorrect_answers.Count)
             AddAnswerButtonToScrollArea(true, ApiClient.FetchedQuestions[rank].correct_answer);
     }
+
     private void AddAnswerButtonToScrollArea(bool isCorrect, string question)
     {
         _scrollView.gameObject.SetActive(true);
@@ -75,10 +97,7 @@ public class GameScreenManager : MonoBehaviour
 
     private void ClearScrollArea()
     {
-        for (int i = 0; i < _contentContainer.childCount; i++)
-        {
-            Destroy(_contentContainer.GetChild(i).gameObject);
-        }
+        for (var i = 0; i < _contentContainer.childCount; i++) Destroy(_contentContainer.GetChild(i).gameObject);
     }
 
     private void ShowNextQuestion()
@@ -92,7 +111,8 @@ public class GameScreenManager : MonoBehaviour
             AddAnswersForQuestion(_questionRank);
             InitActionButton();
             _questionRank++;
-            StartCoroutine(CountDownThenShowNextQuestion(60));
+            _elapsedTime = SecondsToCount + 1.0f;
+            StartCoroutine(CountDownThenShowNextQuestion(SecondsToCount));
         }
         else
         {
@@ -102,7 +122,7 @@ public class GameScreenManager : MonoBehaviour
 
     private void InitActionButton()
     {
-        _actionButton.onClick.AddListener(DisplayAnswer);
+        _actionButton.onClick.AddListener(DisplayAnswerThenCountDown);
         _actionButtonText.text = "Display Answer";
         UpdateButtonColor(_actionButton, new Color(0.85f, 0.855f, 0.85f));
         _actionButton.enabled = true;
@@ -110,25 +130,22 @@ public class GameScreenManager : MonoBehaviour
 
     private void UpdateButtonColor(Button button, Color newColor)
     {
-        ColorBlock buttonColors = button.gameObject.GetComponent<Button>().colors;
-        buttonColors.normalColor = newColor;
-        button.gameObject.GetComponent<Button>().colors = buttonColors;
+        button.gameObject.GetComponent<Image>().color = newColor;
     }
 
     private IEnumerator CountDownThenShowNextQuestion(float seconds)
     {
-        float elapsedTime = 0;
-        _actionButton.enabled = false;
-        while (elapsedTime < seconds)
+        _elapsedTime = 0;
+        while (_elapsedTime < seconds)
         {
-            elapsedTime += Time.deltaTime;
-            _counterText.text =(int) (seconds - elapsedTime) + " till the next question";
+            _elapsedTime += Time.deltaTime;
+            _counterText.text = (int) (seconds - _elapsedTime) + " till the next question";
             yield return new WaitForEndOfFrame();
         }
         DisplayAnswer();
         StartCoroutine(CountDownInActionButtonThenShowNext(3));
     }
-    
+
     private IEnumerator WaitForSecondsThenCountDown(float seconds)
     {
         float elapsedTime = 0;
@@ -141,7 +158,7 @@ public class GameScreenManager : MonoBehaviour
 
         StartCoroutine(CountDownInActionButtonThenShowNext(3));
     }
-    
+
     private IEnumerator CountDownInActionButtonThenShowNext(float seconds)
     {
         float elapsedTime = 0;
@@ -154,6 +171,7 @@ public class GameScreenManager : MonoBehaviour
                 "Next Question In " + (int) (seconds - elapsedTime) + " Seconds";
             yield return new WaitForEndOfFrame();
         }
+
         ShowNextQuestion();
     }
 
@@ -170,25 +188,27 @@ public class GameScreenManager : MonoBehaviour
             _actionButtonText.text = "Wrong!";
             UpdateButtonColor(_actionButton, new Color(1, 0, 0));
         }
+
         StartCoroutine(WaitForSecondsThenCountDown(1));
     }
 
+    private void DisplayAnswerThenCountDown()
+    {
+        DisplayAnswer();
+        StartCoroutine(CountDownInActionButtonThenShowNext(3));
+    }
     private void DisplayAnswer()
     {
         DisableAllAnswers();
-        for (int i = 0; i < _contentContainer.childCount; i++)
-        {
+        for (var i = 0; i < _contentContainer.childCount; i++)
             if (_contentContainer.GetChild(i).gameObject.GetComponent<AnswerButton>().IsCorrect)
                 UpdateButtonColor(_contentContainer.GetChild(i).gameObject.GetComponent<Button>(),
-                    new Color(0,1,0));
-        }
+                    new Color(0, 1, 0));
     }
 
     private void DisableAllAnswers()
     {
-        for (int i = 0; i < _contentContainer.childCount; i++)
-        {
+        for (var i = 0; i < _contentContainer.childCount; i++)
             _contentContainer.GetChild(i).gameObject.GetComponent<Button>().enabled = false;
-        }
     }
 }

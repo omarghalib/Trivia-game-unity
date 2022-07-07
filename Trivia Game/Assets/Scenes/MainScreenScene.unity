@@ -1122,6 +1122,7 @@ MonoBehaviour:
   _chooseCategoryButton: {fileID: 1435960461}
   _PlayRandomButton: {fileID: 1635557336}
   _PlayWithCategoryButton: {fileID: 1937754090}
+  _PlayWithCategoryButtonText: {fileID: 300128961}
 --- !u!1 &2072644422
 GameObject:
   m_ObjectHideFlags: 0

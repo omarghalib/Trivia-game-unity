@@ -8,6 +8,7 @@ public class CategoryButton : MonoBehaviour
     [SerializeField] private TextMeshProUGUI _text;
     public int CategoryId;
     private string _categoryName;
+
     public string CategoryName
     {
         get => _categoryName;
@@ -17,14 +18,14 @@ public class CategoryButton : MonoBehaviour
             _text.text = value;
         }
     }
+
     // Start is called before the first frame update
-    void Start()
+    private void Start()
     {
     }
 
     // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        
     }
 }
