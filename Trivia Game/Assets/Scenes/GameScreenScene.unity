@@ -1195,6 +1195,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a0a99d77077464b86b28358a07bc4080, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _actionButton: {fileID: 1362612234}
+  _questionText: {fileID: 1841888554}
+  _questionRankText: {fileID: 2012395499}
+  _contentContainer: {fileID: 16922645}
+  _answerButtonPrefab: {fileID: 4865082013299278515, guid: 4df5998740c6240bfb042f9a43b84cf6, type: 3}
+  _scrollView: {fileID: 576645007}
 --- !u!1 &1841888552
 GameObject:
   m_ObjectHideFlags: 0
