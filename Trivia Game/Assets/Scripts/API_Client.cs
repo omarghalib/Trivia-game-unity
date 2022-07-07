@@ -34,6 +34,7 @@ public static class ApiClient
         public string question;
         public string correct_answer;
         public List<string> incorrect_answers;
+        public string category;
     }
     public static List<Category> GetCategories()
     {

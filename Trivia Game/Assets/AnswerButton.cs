@@ -25,6 +25,13 @@ public class AnswerButton : MonoBehaviour
     }
     void OnClick()
     {
-        Debug.Log(IsCorrect);
+        if (!IsCorrect)
+        {
+            ColorBlock buttonColors = gameObject.GetComponent<Button>().colors;
+            buttonColors.normalColor = new Color(1,0,0);
+            gameObject.GetComponent<Button>().colors = buttonColors;
+            Debug.Log("wrong answer clicked");
+        }
+        FindObjectOfType<GameScreenManager>().AnswerClicked(IsCorrect);
     }
 }
