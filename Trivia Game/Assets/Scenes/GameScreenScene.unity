@@ -2337,6 +2337,9 @@ MonoBehaviour:
   _questionCategory: {fileID: 1934897725}
   _counterText: {fileID: 233701845}
   _backButton: {fileID: 1359088848}
+  _goBackPopUp: {fileID: 1100089688}
+  _goBackPopUpYes: {fileID: 1166954977}
+  _goBackPopUpNo: {fileID: 287657556}
   _contentContainer: {fileID: 16922645}
   _answerButtonPrefab: {fileID: 4865082013299278515, guid: 4df5998740c6240bfb042f9a43b84cf6, type: 3}
   _scrollView: {fileID: 576645007}

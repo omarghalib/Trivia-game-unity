@@ -51,7 +51,7 @@ public class GameScreenManager : MonoBehaviour
     }
     private void UpdateQuestionRank(int rank)
     {
-        _questionRankText.text = "Question " + rank + 1 + " / " + ApiClient.FetchedQuestions.Count;
+        _questionRankText.text = "Question " + (rank + 1) + " / " + ApiClient.FetchedQuestions.Count;
     }
 
     private void UpdateQuestionText(int rank)
@@ -116,7 +116,7 @@ public class GameScreenManager : MonoBehaviour
         }
         else
         {
-            _actionButton.enabled = false;
+            SceneManager.LoadScene("MainScreenScene");
         }
     }
 

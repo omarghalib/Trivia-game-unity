@@ -43,7 +43,9 @@ public static class ApiClient
         var response = (HttpWebResponse) request.GetResponse();
         var reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         var jsonResponse = reader.ReadToEnd();
-        return JsonUtility.FromJson<CategoryResponse>(jsonResponse).trivia_categories;
+        List<Category> result = JsonUtility.FromJson<CategoryResponse>(jsonResponse).trivia_categories;
+        result.Sort((p1,p2)=>String.Compare(p1.name, p2.name, StringComparison.Ordinal));
+        return result;
     }
 
     public static void FetchQuestions(int categoryId)
