@@ -2,12 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
+using System.Threading.Tasks;
 using UnityEngine;
 
-public static class API_Client
+public static class ApiClient
 {
     [Serializable]
-    public class CategoryDictionary
+    public class CategoryList
     {
         public List<Category> trivia_categories;
     }
@@ -18,19 +19,14 @@ public static class API_Client
         public int id;
         public string name;
     }
-    public static void GetCategories()
+    public static List<Category> GetCategories()
     {
         HttpWebRequest request = (HttpWebRequest)WebRequest.Create("https://opentdb.com/api_category.php");
         HttpWebResponse response = (HttpWebResponse)request.GetResponse();
         StreamReader reader = new StreamReader(response.GetResponseStream() ?? throw new InvalidOperationException());
         string jsonResponse = reader.ReadToEnd();
-        CategoryDictionary categories = JsonUtility.FromJson<CategoryDictionary>(jsonResponse);
-        Debug.Log("jsonResponse: "+jsonResponse);
-        Debug.Log(categories.trivia_categories.Count);
-        foreach (var category in categories.trivia_categories)
-        {
-            Debug.Log(category.id);
-            Debug.Log(category.name);
-        }
+        return JsonUtility.FromJson<CategoryList>(jsonResponse).trivia_categories;
     }
+    
+    
 }
